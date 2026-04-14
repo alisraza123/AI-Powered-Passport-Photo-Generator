@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Studio Pro | AI Passport</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --accent: #3b82f6;
+        --bg: #f0f4f8;
+        --surface: rgba(255, 255, 255, 0.8);
+        --border: rgba(226, 232, 240, 0.8);
+        --text: #0f172a;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Outfit", sans-serif;
+        background: #e2e8f0;
+        color: var(--text);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Korean Glass Effect Sidebar */
+      .sidebar {
+        width: 340px;
+        background: var(--surface);
+        padding: 25px;
+        backdrop-filter: blur(15px);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+        overflow-y: auto;
+        z-index: 10;
+      }
+
+      .logo {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+
+      .upload-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        background: rgba(241, 245, 249, 0.5);
+        position: relative;
+      }
+      .upload-zone:hover {
+        border-color: var(--accent);
+        background: #eff6ff;
+      }
+      .upload-zone i {
+        font-size: 30px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+      .upload-zone p {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        margin: 0;
+      }
+      .upload-zone input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .file-name {
+        font-size: 11px;
+        color: var(--accent);
+        margin-top: 8px;
+        font-weight: 700;
+        display: none;
+      }
+
+      .control-card {
+        background: rgba(255, 255, 255, 0.6);
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+      }
+      label {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: white;
+      }
+
+      .btn {
+        padding: 15px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+      }
+      #previewBtn {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+      #pdfBtn {
+        background: #10b981;
+        color: white;
+        display: none;
+        margin-top: 5px;
+      }
+
+      /* Stage */
+      .stage {
+        flex: 1;
+        display: flex;
+        padding: 25px;
+        gap: 25px;
+        background: #f8fafc;
+      }
+      .view-panel {
+        flex: 1;
+        background: var(--surface);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      }
+
+      .panel-header {
+        padding: 12px 20px;
+        background: rgba(248, 250, 252, 0.5);
+        border-bottom: 1px solid var(--border);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+
+      .img-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(241, 245, 249, 0.3);
+        overflow: hidden;
+      }
+      .img-container img {
+        max-width: 90%;
+        max-height: 85%;
+        object-fit: contain;
+        border-radius: 4px;
+      }
+
+      #loaderOverlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #e2e8f0;
+        border-top: 5px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo"><i class="fas fa-magic"></i> STUDIO AI</div>
+
+      <div class="upload-zone" id="dropZone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Drop photo here or click</p>
+        <input type="file" id="imageInput" accept="image/*" />
+        <div id="fileName" class="file-name"></div>
+      </div>
+
+      <div class="control-card">
+        <label>AI Smooth (<span id="valD">20</span>)</label>
+        <input type="range" id="inputD" min="5" max="50" value="20" />
+        <div style="margin-top: 15px"></div>
+        <label>Skin Glow (<span id="valS">30</span>)</label>
+        <input type="range" id="inputS" min="10" max="150" value="30" />
+      </div>
+
+      <div class="control-card" style="border-left: 4px solid var(--accent)">
+        <label
+          ><i class="fas fa-sun"></i> Luminance (<span id="valL">1.0</span
+          >)</label
+        >
+        <input
+          type="range"
+          id="inputL"
+          min="0.5"
+          max="2.0"
+          step="0.1"
+          value="1.0"
+        />
+        <div style="margin-top: 15px"></div>
+        <label
+          ><i class="fas fa-adjust"></i> Contrast (<span id="valC">0</span
+          >)</label
+        >
+        <input type="range" id="inputC" min="-100" max="100" value="0" />
+      </div>
+
+      <div class="control-card">
+        <label>Copies</label>
+        <input type="number" id="countInput" value="8" min="1" max="20" />
+      </div>
+
+      <button id="previewBtn" class="btn">
+        <i class="fas fa-sync-alt"></i> RENDER IMAGE
+      </button>
+      <button id="pdfBtn" class="btn">
+        <i class="fas fa-file-pdf"></i> DOWNLOAD PDF
+      </button>
+    </div>
+
+    <div class="stage">
+      <div class="view-panel">
+        <div class="panel-header">Source Photo</div>
+        <div class="img-container"><img id="rawImg" style="opacity: 0" /></div>
+      </div>
+      <div class="view-panel" style="border: 2px solid var(--accent)">
+        <div class="panel-header" style="color: var(--accent)">
+          AI Processed
+        </div>
+        <div id="loaderOverlay"><div class="spinner"></div></div>
+        <div class="img-container"><img id="procImg" style="opacity: 0" /></div>
+      </div>
+    </div>
+
+    <script>
+      let tempPath = "";
+      const $ = (id) => document.getElementById(id);
+
+      function applyFilters() {
+        const lum = $("inputL").value;
+        const con = 1 + $("inputC").value / 100;
+        $("procImg").style.filter = `brightness(${lum}) contrast(${con})`;
+        $("valL").innerText = lum;
+        $("valC").innerText = $("inputC").value;
+      }
+
+      ["inputL", "inputC"].forEach((id) => ($(id).oninput = applyFilters));
+      $("inputD").oninput = (e) => ($("valD").innerText = e.target.value);
+      $("inputS").oninput = (e) => ($("valS").innerText = e.target.value);
+
+      $("imageInput").onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          $("fileName").innerText = "📄 " + file.name;
+          $("fileName").style.display = "block";
+          const reader = new FileReader();
+          reader.onload = (r) => {
+            $("rawImg").src = r.target.result;
+            $("rawImg").style.opacity = 1;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      $("previewBtn").onclick = async () => {
+        const file = $("imageInput").files[0];
+        if (!file) return alert("Select a photo first!");
+        $("loaderOverlay").style.display = "flex";
+        $("previewBtn").disabled = true;
+
+        const fd = new FormData();
+        fd.append("image", file);
+        fd.append("d", $("inputD").value);
+        fd.append("sigma", $("inputS").value);
+
+        try {
+          const res = await fetch("http://127.0.0.1:5000/preview-passport", {
+            method: "POST",
+            body: fd,
+          });
+          const data = await res.json();
+          if (data.processed) {
+            $("procImg").src = "data:image/jpeg;base64," + data.processed;
+            $("procImg").style.opacity = 1;
+            tempPath = data.temp_path;
+            $("pdfBtn").style.display = "flex";
+            applyFilters();
+          }
+        } catch (err) {
+          alert("Connection Error!");
+        } finally {
+          $("loaderOverlay").style.display = "none";
+          $("previewBtn").disabled = false;
+        }
+      };
+
+      $("pdfBtn").onclick = async () => {
+        $("pdfBtn").innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+        const res = await fetch("http://127.0.0.1:5000/generate-pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            temp_path: tempPath,
+            count: $("countInput").value,
+            luminance: $("inputL").value,
+            contrast: $("inputC").value,
+          }),
+        });
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = window.URL.createObjectURL(blob);
+        a.download = "passport_ai.pdf";
+        a.click();
+        $("pdfBtn").innerHTML = '<i class="fas fa-file-pdf"></i> DOWNLOAD PDF';
+      };
+    </script>
+  </body>
+</html>
